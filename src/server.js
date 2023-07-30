@@ -1,10 +1,11 @@
 import http from 'http'
 import { json } from './middlewares/json.js'
+import { Database } from './middlewares/database.js'
 
 // node src/server.js
 // npm start
 
-const users = [];
+const database = new Database;
 
 const server = http.createServer(async (req, res) => {
     const { method, url } = req;
@@ -12,16 +13,19 @@ const server = http.createServer(async (req, res) => {
     await json(req, res)
 
     if (method === "GET" && url === '/users') {
-        return res
-            .end(JSON.stringify(users));
+        const users = database.select('users')
+        return res.end(JSON.stringify(users));
     }
+
     if (method === "POST" && url === '/users') {
         const { name, email } = req.fullBody;
-        users.push({
+        const user = {
             id: 1,
             name,
             email
-        });
+        };
+
+        database.insert('users', user)
     }
 
     return res.end('mundo criado');
